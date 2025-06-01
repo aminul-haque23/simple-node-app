@@ -1,0 +1,67 @@
+/* public/css/styles.css */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #333;
+  color: white;
+  padding: 1rem;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+main {
+  padding: 2rem;
+}
+
+form label {
+  font-weight: bold;
+}
+
+form input {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.5rem;
+}
+
+form button {
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+}
+
+#role-label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+#role-select {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #fff;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}

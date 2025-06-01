@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <!-- Clicking Home will redirect back to /admin (since role=admin) -->
+        <li><a href="/">Home</a></li>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, <strong><%= user.name %></strong> (<%= user.username %>)</p>
+    <p>Your role: <strong><%= user.role %></strong></p>
+    <hr />
+    <p>This is the page only admins can see. You can manage students, teachers, or view stats here.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <!-- Home link now redirects back to the user’s dashboard -->
+        <li><a href="/">Home</a></li>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Your Profile</h1>
+    <p><strong>Name:</strong> <%= user.name %></p>
+    <p><strong>Username:</strong> <%= user.username %></p>
+    <p><strong>Role:</strong> <%= user.role %></p>
+    <hr />
+    <p>Welcome to your profile page! Any logged‐in user can see this.</p>
+  </main>
+</body>
+</html>
