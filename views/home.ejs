@@ -1,28 +1,242 @@
-<!-- views/home.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <title>School Management System</title>
+  <style>
+    /* ---------- Reset & Base Styles ---------- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      background-color: #f5f7fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ---------- Header & Navigation ---------- */
+    header {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    header .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-size: 1.75rem;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+    nav a {
+      padding: 0.5rem 1rem;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      color: #fff;
+    }
+    nav a:hover {
+      background-color: #fff;
+      color: #2c3e50;
+      border-color: #fff;
+    }
+
+    /* ---------- Hero Section ---------- */
+    .hero {
+      flex: 1;
+      background: url('https://images.unsplash.com/photo-1550655887-8e7c5e5cb0d3?auto=format&fit=crop&w=1350&q=80') no-repeat center/cover;
+      padding: 4rem 2rem;
+      text-align: center;
+      color: #fff;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .hero-content {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      z-index: 1;
+    }
+    .hero h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .hero .cta-button {
+      display: inline-block;
+      background-color: #e67e22;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    .hero .cta-button:hover {
+      background-color: #cf711f;
+    }
+
+    /* ---------- Features Section ---------- */
+    .features {
+      background-color: #fff;
+      padding: 3rem 2rem;
+    }
+    .features .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    .feature-card {
+      background-color: #ecf0f1;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    .feature-card h3 {
+      margin-bottom: 0.75rem;
+      color: #2c3e50;
+    }
+    .feature-card p {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      background-color: #2c3e50;
+      color: #fff;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    /* ---------- Responsive Adjustments ---------- */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+      .hero h2 {
+        font-size: 2rem;
+      }
+      .hero p {
+        font-size: 1rem;
+      }
+    }
+    @media (max-width: 480px) {
+      nav ul {
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero {
+        padding: 3rem 1rem;
+      }
+      .hero h2 {
+        font-size: 1.75rem;
+      }
+      .hero p {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </head>
 <body>
+
+  <!-- Header / Navigation -->
   <header>
-    <nav>
-      <ul>
-        <!-- Since a signed-in user never reaches this template (they’re redirected), 
-             we only need to show login/signup here. -->
-        <li><a href="/">Home</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/signup">Sign Up</a></li>
-      </ul>
-    </nav>
+    <div class="nav-container">
+      <h1>School Management System</h1>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/login">Log In</a></li>
+          <li><a href="/signup">Sign Up</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <main>
-    <h1>Welcome to the Simple Node.js App</h1>
-    <p>Please log in or sign up to continue.</p>
-  </main>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>Welcome to Our School Portal</h2>
+      <p>
+        A unified platform for students, teachers, and administrators to collaborate, track progress, and manage every aspect of your school’s academic life.
+      </p>
+      <a href="/signup" class="cta-button">Get Started Now</a>
+    </div>
+  </section>
+
+  <!-- Features / Highlights Section -->
+  <section class="features">
+    <div class="container">
+      <div class="feature-card">
+        <h3>Track Attendance</h3>
+        <p>
+          Students and teachers can mark or review attendance in real time, ensuring everyone stays on top of their schedules.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>Manage Assignments</h3>
+        <p>
+          Teachers can create, assign, and grade coursework; students can submit and check feedback—all from one dashboard.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>View Grades & Reports</h3>
+        <p>
+          Students can monitor their grades, and administrators can generate school‐wide performance reports in a few clicks.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>Communication Tools</h3>
+        <p>
+          Built‐in announcements and messaging keep everyone informed—no more lost notes or missed emails.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    &copy; <%= new Date().getFullYear() %> School Management System. All rights reserved.
+  </footer>
+
 </body>
 </html>
