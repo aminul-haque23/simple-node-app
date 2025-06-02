@@ -5,173 +5,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>School Management System</title>
   <style>
-    /* ---------- Reset & Base Styles ---------- */
-    *, *::before, *::after {
+    /* Reset & Base Styles */
+    * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    html {
-      font-size: 16px;
-      scroll-behavior: smooth;
-    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       line-height: 1.6;
-      background-color: #f5f7fa;
+      background-color: #f0f0f0;
       color: #333;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
     a {
+      color: #007bff;
       text-decoration: none;
-      color: inherit;
     }
 
-    /* ---------- Header & Navigation ---------- */
+    /* Header & Navigation */
     header {
-      background-color: #2c3e50;
+      background-color: #333;
       color: #fff;
-      padding: 1rem 2rem;
+      padding: 1rem;
     }
-    header .nav-container {
-      max-width: 1100px;
+    header .container {
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
     }
     header h1 {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
     }
     nav ul {
       list-style: none;
       display: flex;
-      gap: 1rem;
+    }
+    nav li {
+      margin-left: 1rem;
     }
     nav a {
-      padding: 0.5rem 1rem;
-      border: 2px solid transparent;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-      font-weight: 500;
       color: #fff;
+      padding: 0.5rem;
     }
     nav a:hover {
-      background-color: #fff;
-      color: #2c3e50;
-      border-color: #fff;
+      color: #007bff;
     }
 
-    /* ---------- Hero Section ---------- */
+    /* Hero Section */
     .hero {
-      flex: 1;
-      background: url('https://images.unsplash.com/photo-1550655887-8e7c5e5cb0d3?auto=format&fit=crop&w=1350&q=80') no-repeat center/cover;
-      padding: 4rem 2rem;
+      background: linear-gradient(to bottom, #e6f7ff, #ffffff);
+      padding: 3rem 1rem;
       text-align: center;
-      color: #fff;
-      position: relative;
     }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-    }
-    .hero-content {
-      position: relative;
+    .hero-container {
       max-width: 800px;
       margin: 0 auto;
-      z-index: 1;
     }
     .hero h2 {
-      font-size: 2.5rem;
+      font-size: 2rem;
       margin-bottom: 1rem;
     }
     .hero p {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
     }
-    .hero .cta-button {
-      display: inline-block;
-      background-color: #e67e22;
+    .cta-button {
+      background-color: #007bff;
       color: #fff;
       padding: 0.75rem 1.5rem;
       border-radius: 4px;
-      font-size: 1rem;
-      transition: background-color 0.3s ease;
     }
-    .hero .cta-button:hover {
-      background-color: #cf711f;
+    .cta-button:hover {
+      background-color: #0056b3;
     }
 
-    /* ---------- Features Section ---------- */
+    /* Features Section */
     .features {
-      background-color: #fff;
-      padding: 3rem 2rem;
+      padding: 2rem 1rem;
     }
     .features .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
     }
     .feature-card {
-      background-color: #ecf0f1;
-      padding: 1.5rem;
-      border-radius: 8px;
+      border: 1px solid #ddd;
+      padding: 1rem;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-    }
-    .feature-card:hover {
-      transform: translateY(-5px);
+      border-radius: 4px;
     }
     .feature-card h3 {
-      margin-bottom: 0.75rem;
-      color: #2c3e50;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
     }
     .feature-card p {
-      font-size: 0.95rem;
-      color: #555;
+      font-size: 1rem;
     }
 
-    /* ---------- Footer ---------- */
+    /* Footer */
     footer {
-      background-color: #2c3e50;
+      background-color: #333;
       color: #fff;
       text-align: center;
-      padding: 1rem 0;
+      padding: 1rem;
       font-size: 0.9rem;
     }
 
-    /* ---------- Responsive Adjustments ---------- */
+    /* Responsive Adjustments */
     @media (max-width: 768px) {
-      header h1 {
-        font-size: 1.5rem;
+      header .container {
+        flex-direction: column;
+      }
+      nav ul {
+        flex-direction: column;
+        margin-top: 1rem;
+      }
+      nav li {
+        margin: 0.5rem 0;
       }
       .hero h2 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       .hero p {
-        font-size: 1rem;
+        font-size: 0.9rem;
       }
     }
     @media (max-width: 480px) {
-      nav ul {
-        flex-direction: column;
-        align-items: center;
-      }
       .hero {
-        padding: 3rem 1rem;
+        padding: 2rem 1rem;
       }
-      .hero h2 {
-        font-size: 1.75rem;
-      }
-      .hero p {
-        font-size: 0.95rem;
+      .cta-button {
+        padding: 0.5rem 1rem;
       }
     }
   </style>
@@ -180,7 +148,7 @@
 
   <!-- Header / Navigation -->
   <header>
-    <div class="nav-container">
+    <div class="container">
       <h1>School Management System</h1>
       <nav>
         <ul>
@@ -194,7 +162,7 @@
 
   <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-content">
+    <div class="hero-container">
       <h2>Welcome to Our School Portal</h2>
       <p>
         A unified platform for students, teachers, and administrators to collaborate, track progress, and manage every aspect of your school’s academic life.
@@ -235,7 +203,7 @@
 
   <!-- Footer -->
   <footer>
-    &copy; <%= new Date().getFullYear() %> School Management System. All rights reserved.
+    © <%= new Date().getFullYear() %> School Management System. All rights reserved.
   </footer>
 
 </body>
