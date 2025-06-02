@@ -5,24 +5,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Home</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/home.css" />
+
 </head>
 <body>
   <header>
     <nav>
       <ul>
-        <!-- Since a signed-in user never reaches this template (they’re redirected), 
-             we only need to show login/signup here. -->
         <li><a href="/">Home</a></li>
         <li><a href="/login">Login</a></li>
-        <li><a href="/signup">Sign Up</a></li>
+        <li><a target="_blank" href="/signup">Sign Up</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
-    <h1>Welcome to the Simple Node.js App</h1>
-    <p>Please log in or sign up to continue.</p>
+    <h1>Welcome to the School Management App</h1>
+    <div class="section">
+      <p>Teachers can create, assign, and grade coursework; students can submit and check feedback—all from one dashboard.</p>
+    </div>
+    <div class="section">
+      <p>Students can monitor their grades, and administrators can generate school‐wide performance reports in a few clicks.</p>
+    </div>
+    <div class="section">
+      <p>Built‐in announcements and messaging keep everyone informed—no more lost notes or missed emails.</p>
+    </div>
+    <div class="section">
+      <a href="/signup" target="_blank" class="cta-button">Get Started</a>
+    </div>
   </main>
 </body>
 </html>

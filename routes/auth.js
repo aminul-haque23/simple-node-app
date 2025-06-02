@@ -3,6 +3,9 @@ const express = require('express');
 const router  = express.Router();
 const User    = require('../models/User');
 
+const TEACHER_CODE = '12345';
+const ADMIN_CODE = '54321';
+
 // GET "/login" → render login.ejs
 router.get('/login', (req, res) => {
   // If already logged in, redirect to home
@@ -18,7 +21,8 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ username, password });
     if (!user) {
-      return res.send('Invalid credentials. Try again.');
+      return res.render('login', {errorMsg: 'Invalid username or password. Try again.'});
+
     }
 
     // 1. Store username in session
@@ -54,9 +58,20 @@ router.get('/signup', (req, res) => {
 
 // POST "/signup" → handle signup form submission
 router.post('/signup', async (req, res) => {
-  const { name, username, password, role } = req.body;
+  const { name, username, password, address, phone, role, secretCode } = req.body;
+
+  console.log("Secret code:", secretCode);
+  console.log("Type of secret code: ", typeof(secretCode));
+
+  if (role === 'teacher' && secretCode !== TEACHER_CODE) {
+    return res.render('signup', { errorMsg: 'Invalid teacher signup code.' });
+  }
+  if (role === 'admin' && secretCode !== ADMIN_CODE) {
+    return res.render('signup', { errorMsg: 'Invalid admin signup code.' });
+  }
+
   try {
-    const newUser = new User({ name, username, password, role });
+    const newUser = new User({ name, username, password, role, address, phone });
     await newUser.save();
     console.log('✅ User created:', username, '– role:', role);
 
@@ -66,7 +81,7 @@ router.post('/signup', async (req, res) => {
   } catch (err) {
     console.error('❌ Error creating user:', err);
     if (err.code === 11000) {
-      return res.send('Username already taken. Please choose another.');
+      return res.render('signup', {errorMsg: 'Username already taken. Choose another.'});
     }
     return res.status(500).send('Server error');
   }
