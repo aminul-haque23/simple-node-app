@@ -1,3 +1,7 @@
+# Website hosted at: 
+https://simple-node-app-pmcg.onrender.com/
+
+
 # School Management System
 
 A full‐stack Node.js application for managing a school’s users (students, teachers, admins) and courses. Built with Express, EJS, and MongoDB (Mongoose), it implements role‐based authentication, profile management, and CRUD operations. Admins can manage courses and view student/teacher lists; users can sign up with a unique numeric ID, log in, and view/edit their own profiles.
