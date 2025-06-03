@@ -1,5 +1,6 @@
-# Website hosted at: 
-https://simple-node-app-pmcg.onrender.com/
+# Website hosted at:  
+<a href="https://simple-node-app-pmcg.onrender.com/" target="_blank">https://simple-node-app-pmcg.onrender.com/</a>
+
 
 
 # School Management System
