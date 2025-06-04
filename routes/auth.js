@@ -58,7 +58,7 @@ router.get('/signup', (req, res) => {
 
 // POST "/signup" → handle signup form submission
 router.post('/signup', async (req, res) => {
-  const { name, username, password, address, phone, role, secretCode } = req.body;
+  const { idNumber, name, username, password, address, phone, role, secretCode } = req.body;
 
   console.log("Secret code:", secretCode);
   console.log("Type of secret code: ", typeof(secretCode));
@@ -71,19 +71,28 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-    const newUser = new User({ name, username, password, role, address, phone });
+    const newUser = new User({ idNumber, name, username, password, role, address, phone });
     await newUser.save();
     console.log('✅ User created:', username, '– role:', role);
 
     // Automatically log them in (optional) or redirect to login
     // Let’s redirect to /login so they can type credentials:
     return res.redirect('/login');
-  } catch (err) {
+  }
+   catch (err) {
     console.error('❌ Error creating user:', err);
+    // Duplicate key (could be idNumber or username)
     if (err.code === 11000) {
-      return res.render('signup', {errorMsg: 'Username already taken. Choose another.'});
+      // Determine which field was duplicated:
+      const dupKey = Object.keys(err.keyPattern)[0];
+      if (dupKey === 'idNumber') {
+        return res.render('signup', { errorMsg: 'ID number already in use.' });
+      }
+      if (dupKey === 'username') {
+        return res.render('signup', { errorMsg: 'Username already taken.' });
+      }
     }
-    return res.status(500).send('Server error');
+    return res.render('signup', { errorMsg: 'Server error. Please try again.' });
   }
 });
 

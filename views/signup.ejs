@@ -6,11 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up</title>
   <style>
-    /* === Basic Reset & Layout === */
+    /* ===== Basic Reset & Layout ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background-color: #282828;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -73,6 +73,17 @@
     <h2>Create an Account</h2>
 
     <form action="/signup" method="POST">
+      <label for="idNumber">ID Number (digits only)</label>
+      <input
+        type="text"
+        id="idNumber"
+        name="idNumber"
+        placeholder="Enter unique numeric ID"
+        pattern="\d+"
+        title="Digits only"
+        required
+      />
+
       <label for="name">Full Name</label>
       <input type="text" id="name" name="name" required />
 
