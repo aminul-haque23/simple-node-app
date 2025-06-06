@@ -1,0 +1,172 @@
+<!-- views/teachers.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Teachers</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background-color: #2a3d66;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== Main ===== */
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: #2a3d66;
+      text-align: center;
+    }
+    .error {
+      margin-bottom: 1rem;
+      color: #c0392b;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    /* ===== Search Bar ===== */
+    .search-bar {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .search-bar input[type="text"] {
+      width: 60%;
+      max-width: 300px;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+      outline: none;
+    }
+    .search-bar button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #2a3d66;
+      background-color: #2a3d66;
+      color: #fff;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+    .search-bar button:hover {
+      background-color: #1f2b4f;
+    }
+
+    /* ===== List of Teachers ===== */
+    .list-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .user-card {
+      background-color: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1rem;
+      transition: transform 0.2s ease;
+    }
+    .user-card:hover {
+      transform: translateY(-4px);
+    }
+    .user-card h3 {
+      margin-bottom: 0.5rem;
+      color: #2a3d66;
+    }
+    .user-card p {
+      margin-bottom: 0.25rem;
+      color: #555;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      .list-container {
+        grid-template-columns: 1fr;
+      }
+      .search-bar input[type="text"] {
+        width: 100%;
+        max-width: none;
+        border-radius: 4px 4px 0 0;
+      }
+      .search-bar button {
+        width: 100%;
+        border-radius: 0 0 4px 4px;
+        margin-top: 0.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/admin">Admin</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Manage Teachers</h2>
+
+    <% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+      <div class="error"><%= errorMsg %></div>
+    <% } %>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <form action="/admin/teachers" method="GET">
+        <input
+          type="text"
+          name="searchId"
+          placeholder="Search by ID Number"
+          value="<%= searchId %>"
+        />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <!-- Teachers Cards -->
+    <% if (teachers.length === 0) { %>
+      <p style="text-align:center;">No teachers found.</p>
+    <% } else { %>
+      <div class="list-container">
+        <% teachers.forEach(teacher => { %>
+          <div class="user-card">
+            <h3><%= teacher.name %></h3>
+            <p><strong>ID:</strong> <%= teacher.idNumber %></p>
+            <p><strong>Username:</strong> <%= teacher.username %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+</body>
+</html>

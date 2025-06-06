@@ -1,17 +1,13 @@
-<!-- views/admin.ejs -->
+<!-- views/course-detail.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard</title>
+  <title>Course Details</title>
   <style>
     /* ===== Reset & Base ===== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
@@ -36,61 +32,88 @@
       text-decoration: underline;
     }
 
-    /* ===== Dashboard Container ===== */
+    /* ===== Form Container ===== */
     main {
-      max-width: 800px;
+      max-width: 700px;
       margin: 2rem auto;
       background-color: #fff;
       padding: 2rem;
       border-radius: 6px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      text-align: center;
     }
     h2 {
       margin-bottom: 1rem;
       color: #2a3d66;
-    }
-    .info {
-      margin-bottom: 2rem;
-      font-size: 1rem;
-      text-align: left;
-    }
-    .info span {
-      font-weight: bold;
-    }
-
-    /* ===== Admin Action Buttons ===== */
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .action-btn {
-      flex: 1 1 200px;
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background-color: #2a3d66;
-      color: #fff;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
       text-align: center;
     }
-    .action-btn:hover {
+    form label {
+      display: block;
+      margin-top: 0.75rem;
+      font-weight: bold;
+      color: #333;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    form input:focus, form textarea:focus {
+      outline: none;
+      border-color: #2a3d66;
+    }
+    form button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #2a3d66;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    form button:hover {
       background-color: #1f2b4f;
     }
 
+    /* ===== Delete Button ===== */
+    .delete-btn {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .delete-btn:hover {
+      background-color: #a92d23;
+    }
+
+    /* ===== Error Message ===== */
+    .error {
+      margin-top: 1rem;
+      color: #c0392b;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
     /* ===== Responsive ===== */
-    @media (max-width: 600px) {
+    @media (max-width: 480px) {
+      header {
+        padding: 0.75rem 1rem;
+      }
       main {
         margin: 1rem;
         padding: 1rem;
       }
-      .actions {
-        flex-direction: column;
+      h2 {
+        font-size: 1.5rem;
       }
     }
   </style>
@@ -104,27 +127,86 @@
         <li><a href="/">Home</a></li>
         <li><a href="/profile">Profile</a></li>
         <li><a href="/admin">Admin</a></li>
+        <li><a href="/admin/courses">Courses</a></li>
         <li><a href="/logout">Log Out</a></li>
       </ul>
     </nav>
   </header>
 
+  <!-- Edit & Delete Form -->
   <main>
-    <h2>Admin Dashboard</h2>
+    <h2>Edit Course: <%= course.courseId %></h2>
 
-    <!-- Admin Info -->
-    <div class="info">
-      <p><span>Name:</span> <%= user.name %></p>
-      <p><span>Username:</span> <%= user.username %></p>
-      <p><span>Role:</span> <%= user.role %></p>
-    </div>
+    <% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+      <div class="error"><%= errorMsg %></div>
+    <% } %>
 
-    <!-- Action Buttons -->
-    <div class="actions">
-      <a href="/admin/courses" class="action-btn">Manage Courses</a>
-      <a href="/admin/students" class="action-btn">Manage Students</a>
-      <a href="/admin/teachers" class="action-btn">Manage Teachers</a>
-    </div>
+    <!-- Edit Form -->
+    <form action="/admin/courses/<%= course.courseId %>/edit" method="POST">
+      <label for="courseId">Course ID</label>
+      <input
+        type="text"
+        id="courseId"
+        name="courseId"
+        value="<%= course.courseId %>"
+        readonly
+      />
+
+      <label for="name">Course Name</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        value="<%= course.name %>"
+        required
+      />
+
+      <label for="section">Section</label>
+      <input
+        type="text"
+        id="section"
+        name="section"
+        value="<%= course.section %>"
+        required
+      />
+
+      <label for="startDate">Start Date</label>
+      <input
+        type="date"
+        id="startDate"
+        name="startDate"
+        value="<%= new Date(course.startDate).toISOString().slice(0,10) %>"
+        required
+      />
+
+      <label for="endDate">End Date</label>
+      <input
+        type="date"
+        id="endDate"
+        name="endDate"
+        value="<%= new Date(course.endDate).toISOString().slice(0,10) %>"
+        required
+      />
+
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        name="description"
+        rows="4"
+        required
+      ><%= course.description %></textarea>
+
+      <button href="/admin/courses" type="submit">Save Changes</button>
+    </form>
+
+    <!-- Delete Button -->
+    <form
+      action="/admin/courses/<%= course.courseId %>/delete"
+      method="POST"
+      onsubmit="return confirm('Are you sure you want to delete this course?');"
+    >
+      <button type="submit" class="delete-btn">Delete Course</button>
+    </form>
   </main>
 
 </body>

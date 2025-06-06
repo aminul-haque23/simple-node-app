@@ -29,8 +29,10 @@ router.post('/login', async (req, res) => {
     req.session.username = user.username;
     req.session.name = user.name; // you can store multiple fields if you like
     req.session.role = user.role;
+    req.session.userId = user._id;
 
     console.log('🟢 User role after login:', req.session.role);
+    console.log('🟢 User id after login:', req.session.userId);
 
     if(user.role == 'student'){
       return res.redirect('/student');

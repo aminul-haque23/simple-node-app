@@ -2,7 +2,9 @@
 const express = require('express');
 const router  = express.Router();
 const User    = require('../models/User');
-const Course = require('../models/Course')
+const Course = require('../models/Course');
+const Registration = require('../models/Registration');
+const mongoose = require('mongoose');
 
 
 // 1. Middleware: Ensure the user is logged in
@@ -24,13 +26,15 @@ function requireRole(role) {
   };
 }
 
-// 3. Student-only page (GET /student)
+// -----------------------------------------
+// 1) STUDENT DASHBOARD: GET /student
+// -----------------------------------------
 router.get(
   '/student',
   isLoggedIn,
   requireRole('student'),
   (req, res) => {
-    // Pass the entire session.user info into the template
+    // Render a simple student menu with two options
     return res.render('student', {
       user: {
         username: req.session.username,
@@ -38,6 +42,212 @@ router.get(
         role: req.session.role
       }
     });
+  }
+);
+
+// -----------------------------------------
+// 2) AVAILABLE COURSES: GET /student/courses
+// -----------------------------------------
+router.get(
+  '/student/courses',
+  isLoggedIn,
+  requireRole('student'),
+  async (req, res) => {
+    try {
+      // Fetch future courses
+      const now = new Date();
+      const futureCourses = await Course.find({ startDate: { $gt: now } }).lean();
+
+      // Fetch existing registrations for this student
+      const registrations = await Registration.find({ student: req.session.userId }).lean();
+      const registeredIds = new Set(registrations.map(r => r.course.toString()));
+
+      // Filter out courses already registered
+      const availableCourses = futureCourses.filter(c => !registeredIds.has(c._id.toString()));
+
+      return res.render('available-courses', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        availableCourses,
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error loading available courses:', err);
+      return res.render('available-courses', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        availableCourses: [],
+        errorMsg: 'Unable to load courses. Please try again.'
+      });
+    }
+  }
+);
+
+// ----------------------------------------------
+// 4) VIEW REGISTERED COURSES: GET /student/registrations
+// ----------------------------------------------
+router.get(
+  '/student/registrations',
+  isLoggedIn,
+  requireRole('student'),
+  async (req, res) => {
+    try {
+      // 1. Load all registrations for this student, populating the course field
+      const regs = await Registration
+        .find({ student: req.session.userId })
+        .populate('course')
+        .lean();
+
+      // 2. Separate valid registrations (course still exists) from orphans
+      const validRegs  = regs.filter(r => r.course);
+      const orphanRegs = regs.filter(r => !r.course).map(r => r._id);
+
+      // 3. Clean up orphaned registrations
+      if (orphanRegs.length > 0) {
+        await Registration.deleteMany({ _id: { $in: orphanRegs } });
+      }
+
+      // 4. Extract the remaining course objects
+      const registeredCourses = validRegs.map(r => r.course);
+
+      return res.render('registered-courses', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        registeredCourses,
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error loading registered courses:', err);
+      return res.render('registered-courses', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        registeredCourses: [],
+        errorMsg: 'Unable to load your registered courses.'
+      });
+    }
+  }
+);
+
+
+// -----------------------------------------
+// 3) REGISTER FOR A COURSE: POST /student/courses/:courseId/register
+// -----------------------------------------
+router.post(
+  '/student/courses/:courseId/register',
+  isLoggedIn,
+  requireRole('student'),
+  async (req, res) => {
+    const { courseId } = req.params;
+    try {
+      // Find course by _id
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).send('Course not found');
+      }
+
+      // Ensure course hasn't started
+      if (course.startDate <= new Date()) {
+        return res.status(400).send('Cannot register: course has already started');
+      }
+
+      // Create registration
+      await Registration.create({
+        student: req.session.userId,
+        course: course._id
+      });
+
+      return res.redirect('/student/courses');
+    } catch (err) {
+      console.error('❌ Error registering for course:', err);
+      let msg = 'Unable to register. Please try again.';
+      if (err.code === 11000) {
+        msg = 'You are already registered for this course.';
+      }
+      // Re‐render available courses with error
+      try {
+        const now = new Date();
+        const futureCourses = await Course.find({ startDate: { $gt: now } }).lean();
+        const registrations = await Registration.find({ student: req.session.userId }).lean();
+        const registeredIds = new Set(registrations.map(r => r.course.toString()));
+        const availableCourses = futureCourses.filter(c => !registeredIds.has(c._id.toString()));
+        return res.render('available-courses', {
+          user: {
+            username: req.session.username,
+            name: req.session.name,
+            role: req.session.role
+          },
+          availableCourses,
+          errorMsg: msg
+        });
+      } catch (innerErr) {
+        console.error('❌ Error reloading available courses after failure:', innerErr);
+        return res.status(500).send('Server error');
+      }
+    }
+  }
+);
+
+// ----------------------------------------------
+// UNREGISTER FROM COURSE: POST /student/registrations/:courseId/remove
+// ----------------------------------------------
+router.post(
+  '/student/registrations/:courseId/remove',
+  isLoggedIn,
+  requireRole('student'),
+  async (req, res) => {
+    const { courseId } = req.params;
+    try {
+      // Delete the registration matching this student and course.
+      // Mongoose will cast `courseId` string to ObjectId automatically.
+      await Registration.findOneAndDelete({
+        student: req.session.userId,
+        course: courseId
+      });
+
+      // Redirect back to the “registered courses” page
+      return res.redirect('/student/registrations');
+    } catch (err) {
+      console.error('❌ Error unregistering from course:', err);
+      // On error, re‐render the registered‐courses page with an error.
+      try {
+        // Re‐fetch valid registrations (same as GET /student/registrations)
+        const regs = await Registration
+          .find({ student: req.session.userId })
+          .populate('course')
+          .lean();
+        const validRegs = regs.filter(r => r.course);
+        const orphanRegs = regs.filter(r => !r.course).map(r => r._id);
+        if (orphanRegs.length > 0) {
+          await Registration.deleteMany({ _id: { $in: orphanRegs } });
+        }
+        const registeredCourses = validRegs.map(r => r.course);
+
+        return res.render('registered-courses', {
+          user: {
+            username: req.session.username,
+            name: req.session.name,
+            role: req.session.role
+          },
+          registeredCourses,
+          errorMsg: 'Unable to remove course. Please try again.'
+        });
+      } catch (innerErr) {
+        console.error('❌ Error reloading after unregister failure:', innerErr);
+        return res.status(500).send('Server error');
+      }
+    }
   }
 );
 
@@ -381,6 +591,94 @@ router.post(
         console.error('❌ Error refetching user after failed update:', innerErr);
         return res.status(500).send('Server error');
       }
+    }
+  }
+);
+
+// -------------------------
+// LIST/SEARCH STUDENTS: GET /admin/students
+// -------------------------
+router.get(
+  '/admin/students',
+  isLoggedIn,
+  requireRole('admin'),
+  async (req, res) => {
+    const searchId = req.query.searchId;
+    try {
+      let students;
+      if (searchId) {
+        // Exact match on idNumber
+        const student = await User.findOne({ idNumber: searchId, role: 'student' }).lean();
+        students = student ? [student] : [];
+      } else {
+        // All students
+        students = await User.find({ role: 'student' }).sort({ idNumber: 1 }).lean();
+      }
+      return res.render('students_admin', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        students,
+        searchId: searchId || '',
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error fetching students:', err);
+      return res.render('students_admin', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        students: [],
+        searchId: searchId || '',
+        errorMsg: 'Unable to load students.'
+      });
+    }
+  }
+);
+
+// -------------------------
+// LIST/SEARCH TEACHERS: GET /admin/teachers
+// -------------------------
+router.get(
+  '/admin/teachers',
+  isLoggedIn,
+  requireRole('admin'),
+  async (req, res) => {
+    const searchId = req.query.searchId;
+    try {
+      let teachers;
+      if (searchId) {
+        const teacher = await User.findOne({ idNumber: searchId, role: 'teacher' }).lean();
+        teachers = teacher ? [teacher] : [];
+      } else {
+        teachers = await User.find({ role: 'teacher' }).sort({ idNumber: 1 }).lean();
+      }
+      return res.render('teachers_admin', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        teachers,
+        searchId: searchId || '',
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error fetching teachers:', err);
+      return res.render('teachers_admin', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        teachers: [],
+        searchId: searchId || '',
+        errorMsg: 'Unable to load teachers.'
+      });
     }
   }
 );
