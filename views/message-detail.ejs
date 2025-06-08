@@ -1,10 +1,10 @@
-<!-- views/student.ejs -->
+<!-- views/message-detail.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Student Dashboard</title>
+  <title>Message from <%= message.sender.name %></title>
   <style>
     /* ===== Reset & Base ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,37 +32,41 @@
       text-decoration: underline;
     }
 
-    /* ===== Main Container ===== */
+    /* ===== Main ===== */
     main {
-      max-width: 600px;
+      max-width: 700px;
       margin: 2rem auto;
       background-color: #fff;
       padding: 2rem;
       border-radius: 6px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      text-align: center;
     }
     h2 {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       color: #2a3d66;
     }
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    .info {
+      margin-bottom: 1.5rem;
     }
-    .buttons a {
+    .info p {
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .content {
+      white-space: pre-wrap;
+      line-height: 1.4;
+      font-size: 1rem;
+    }
+    .back-link {
       display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background-color: #2a3d66;
-      color: #fff;
-      border-radius: 4px;
+      margin-top: 2rem;
+      color: #2a3d66;
       text-decoration: none;
       font-weight: bold;
-      transition: background-color 0.3s ease;
+      transition: color 0.3s ease;
     }
-    .buttons a:hover {
-      background-color: #1f2b4f;
+    .back-link:hover {
+      color: #1f2b4f;
     }
 
     /* ===== Responsive ===== */
@@ -71,35 +75,44 @@
         margin: 1rem;
         padding: 1rem;
       }
-      .buttons a {
-        padding: 0.75rem;
+      h2 {
+        font-size: 1.5rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header / Navigation -->
+  <!-- Header / Nav -->
   <header>
     <nav>
       <ul>
         <li><a href="/">Home</a></li>
+        <% if (user.role === 'student') { %>
+          <li><a href="/student">Dashboard</a></li>
+        <% } else if (user.role === 'teacher') { %>
+          <li><a href="/teacher">Dashboard</a></li>
+        <% } else if (user.role === 'admin') { %>
+          <li><a href="/admin">Dashboard</a></li>
+        <% } %>
         <li><a href="/profile">Profile</a></li>
-        <li><a href="/messages">Inbox</a></li>
-        <li><a href="/messages/send">Send Message</a></li>
+        <li><a href="/messages">Messages</a></li>
         <li><a href="/logout">Log Out</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
-    <h2>Welcome, <%= user.name %>!</h2>
+    <h2>Message from <%= message.sender.name %> (<%= message.sender.role %>)</h2>
 
-    <div class="buttons">
-      <a href="/student/courses">Register for Courses</a>
-      <a href="/student/registrations">View Registered Courses</a>
+    <div class="info">
+      <p><strong>Username:</strong> <%= message.sender.username %></p>
+      <p><strong>Sent At:</strong> <%= new Date(message.sentAt).toLocaleString() %></p>
     </div>
-  </main>
 
+    <div class="content"><%= message.content %></div>
+
+    <a href="/messages" class="back-link">← Back to Inbox</a>
+  </main>
 </body>
 </html>

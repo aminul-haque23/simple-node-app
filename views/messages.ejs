@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Messages</title>
+  <style>
+    /* Reset & Base Styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      color: #202124;
+      line-height: 1.5;
+    }
+    header {
+      background-color: #2a3d66;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      transition: background-color 0.2s;
+    }
+    nav a:hover {
+      background-color: rgba(255,255,255,0.1);
+      border-radius: 4px;
+    }
+
+    /* Main Content */
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: #2a3d66;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .error {
+      margin-top: 1rem;
+      color: #c0392b;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    /* Messages List */
+    .message-list {
+      margin-top: 1rem;
+      background-color: #fff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .message-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #dadce0;
+      text-decoration: none;
+      color: #202124;
+      transition: background-color 0.2s;
+    }
+    .message-item:hover {
+      background-color: #f1f3f4;
+    }
+    .message-item:last-child {
+      border-bottom: none;
+    }
+    .sender-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .sender-name {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    .sender-details {
+      font-size: 0.85rem;
+      color: #5f6368;
+    }
+    .sent-time {
+      font-size: 0.85rem;
+      color: #5f6368;
+      white-space: nowrap;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .message-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem 1rem;
+      }
+      .sent-time {
+        margin-top: 0.5rem;
+      }
+      nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <% if (user.role === 'student') { %>
+          <li><a href="/student">Dashboard</a></li>
+        <% } else if (user.role === 'teacher') { %>
+          <li><a href="/teacher">Dashboard</a></li>
+        <% } else if (user.role === 'admin') { %>
+          <li><a href="/admin">Dashboard</a></li>
+        <% } %>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/messages">Messages</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Inbox</h2>
+
+    <% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+      <div class="error"><%= errorMsg %></div>
+    <% } %>
+
+    <% if (messages.length === 0) { %>
+      <p style="text-align:center;">You have no messages.</p>
+    <% } else { %>
+      <div class="message-list">
+        <% messages.forEach(msg => { %>
+          <a href="/messages/<%= msg._id %>" class="message-item">
+            <div class="sender-info">
+              <div class="sender-name"><%= msg.sender.name %></div>
+              <div class="sender-details">
+                <span class="sender-username"><%= msg.sender.username %></span> | <span class="sender-role"><%= msg.sender.role %></span>
+              </div>
+            </div>
+            <div class="sent-time"><%= new Date(msg.sentAt).toLocaleString() %></div>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+</body>
+</html>

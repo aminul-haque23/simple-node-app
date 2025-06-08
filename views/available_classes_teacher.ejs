@@ -1,0 +1,210 @@
+<!-- views/available-classes.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Classes</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background-color: #2a3d66;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== Main ===== */
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: #2a3d66;
+      text-align: center;
+    }
+    .error {
+      margin-top: 1rem;
+      color: #c0392b;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    /* ===== Sections ===== */
+    .section {
+      margin-bottom: 2rem;
+    }
+    .section h3 {
+      margin-bottom: 0.75rem;
+      color: #2a3d66;
+    }
+
+    /* ===== Cards Container ===== */
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    .course-card {
+      background-color: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1rem;
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+    .course-card:hover {
+      transform: translateY(-4px);
+    }
+    .course-card h4 {
+      margin-bottom: 0.5rem;
+      color: #2a3d66;
+    }
+    .course-card p {
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+    .course-card form button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+    }
+    .register-btn {
+      background-color: #2a3d66;
+      color: #fff;
+    }
+    .register-btn:hover {
+      background-color: #1f2b4f;
+    }
+    .remove-btn {
+      background-color: #c0392b;
+      color: #fff;
+      margin-top: 0.5rem;
+    }
+    .remove-btn:hover {
+      background-color: #a92d23;
+    }
+
+    /* ===== Back Link ===== */
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: #2a3d66;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+    .back-link:hover {
+      color: #1f2b4f;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header / Nav -->
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/teacher">Dashboard</a></li>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Manage Classes</h2>
+
+    <% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+      <div class="error"><%= errorMsg %></div>
+    <% } %>
+
+    <!-- Available Courses Section -->
+    <div class="section">
+      <h3>Available Courses (Unassigned)</h3>
+      <% if (availableCourses.length === 0) { %>
+        <p style="text-align:center;">No courses are available for assignment.</p>
+      <% } else { %>
+        <div class="cards-container">
+          <% availableCourses.forEach(course => { %>
+            <div class="course-card">
+              <h4><%= course.courseId %>: <%= course.name %></h4>
+              <p><strong>Section:</strong> <%= course.section %></p>
+              <p>
+                <strong>Starts:</strong> <%= new Date(course.startDate).toLocaleDateString() %>
+              </p>
+              <form action="/teacher/classes/<%= course._id %>/register" method="POST">
+                <button type="submit" class="register-btn">Assign to Me</button>
+              </form>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Assigned Courses Section -->
+    <div class="section">
+      <h3>Your Assigned Courses</h3>
+      <% if (assignedCourses.length === 0) { %>
+        <p style="text-align:center;">You are not assigned to any courses.</p>
+      <% } else { %>
+        <div class="cards-container">
+          <% assignedCourses.forEach(course => { %>
+            <div class="course-card">
+              <h4><%= course.courseId %>: <%= course.name %></h4>
+              <p><strong>Section:</strong> <%= course.section %></p>
+              <p>
+                <strong>Starts:</strong> <%= new Date(course.startDate).toLocaleDateString() %><br>
+                <strong>Ends:</strong> <%= new Date(course.endDate).toLocaleDateString() %>
+              </p>
+              <p><%= course.description %></p>
+
+              <form
+                action="/teacher/classes/<%= course._id %>/remove"
+                method="POST"
+                onsubmit="return confirm('Remove yourself from this course?');"
+              >
+                <button type="submit" class="remove-btn">Remove</button>
+              </form>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <a href="/teacher" class="back-link">← Back to Dashboard</a>
+  </main>
+
+</body>
+</html>

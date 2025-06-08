@@ -26,6 +26,13 @@ const courseSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true
+  },
+
+  // ← NEW: which teacher is assigned (or null if none)
+  teacher: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 });
 

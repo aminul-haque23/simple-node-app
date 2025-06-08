@@ -5,6 +5,8 @@ const User    = require('../models/User');
 const Course = require('../models/Course');
 const Registration = require('../models/Registration');
 const mongoose = require('mongoose');
+const Message      = require('../models/Message'); // ← new
+
 
 
 // 1. Middleware: Ensure the user is logged in
@@ -251,7 +253,9 @@ router.post(
   }
 );
 
-// 4. Teacher-only page (GET /teacher)
+// -----------------------------------------
+// TEACHER DASHBOARD: GET /teacher
+// -----------------------------------------
 router.get(
   '/teacher',
   isLoggedIn,
@@ -264,6 +268,239 @@ router.get(
         role: req.session.role
       }
     });
+  }
+);
+
+// -----------------------------------------
+// AVAILABLE / ASSIGNED CLASSES: GET /teacher/classes
+// -----------------------------------------
+router.get(
+  '/teacher/classes',
+  isLoggedIn,
+  requireRole('teacher'),
+  async (req, res) => {
+    try {
+      // 1) Fetch all courses that have no teacher assigned
+      const availableCourses = await Course.find({ teacher: null }).lean();
+
+      // 2) Fetch courses where teacher === this teacher
+      const assignedCourses = await Course.find({ teacher: req.session.userId }).lean();
+
+      return res.render('available_classes_teacher', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        availableCourses,
+        assignedCourses,
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error loading teacher classes:', err);
+      return res.render('available_classes_teacher', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        availableCourses: [],
+        assignedCourses: [],
+        errorMsg: 'Unable to load classes. Please try again.'
+      });
+    }
+  }
+);
+
+// -----------------------------------------
+// REGISTER (ASSIGN) A CLASS: POST /teacher/classes/:courseId/register
+// -----------------------------------------
+router.post(
+  '/teacher/classes/:courseId/register',
+  isLoggedIn,
+  requireRole('teacher'),
+  async (req, res) => {
+    const { courseId } = req.params;
+    try {
+      // 1) Find the course by its _id
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).send('Course not found');
+      }
+
+      // 2) Ensure it has no teacher already
+      if (course.teacher) {
+        return res.status(400).send('Course already has a teacher');
+      }
+
+      // 3) Assign this teacher
+      course.teacher = req.session.userId;
+      await course.save();
+
+      // 4) Redirect back to /teacher/classes
+      return res.redirect('/teacher/classes');
+    } catch (err) {
+      console.error('❌ Error assigning class to teacher:', err);
+      // Re‐render with errorMsg
+      try {
+        const availableCourses = await Course.find({ teacher: null }).lean();
+        const assignedCourses = await Course.find({ teacher: req.session.userId }).lean();
+        return res.render('available_classes_teacher', {
+          user: {
+            username: req.session.username,
+            name: req.session.name,
+            role: req.session.role
+          },
+          availableCourses,
+          assignedCourses,
+          errorMsg: 'Unable to assign class. Please try again.'
+        });
+      } catch (innerErr) {
+        console.error('❌ Error reloading classes after assign failure:', innerErr);
+        return res.status(500).send('Server error');
+      }
+    }
+  }
+);
+
+// -----------------------------------------
+// REMOVE (UNASSIGN) A CLASS: POST /teacher/classes/:courseId/remove
+// -----------------------------------------
+router.post(
+  '/teacher/classes/:courseId/remove',
+  isLoggedIn,
+  requireRole('teacher'),
+  async (req, res) => {
+    const { courseId } = req.params;
+    try {
+      // Find the course where teacher matches this teacher
+      const course = await Course.findOne({
+        _id: courseId,
+        teacher: req.session.userId
+      });
+      if (!course) {
+        return res.status(404).send('You are not assigned to this course');
+      }
+
+      // Unassign the teacher
+      course.teacher = null;
+      await course.save();
+
+      return res.redirect('/teacher/classes');
+    } catch (err) {
+      console.error('❌ Error unassigning class from teacher:', err);
+      // Re‐render with errorMsg
+      try {
+        const availableCourses = await Course.find({ teacher: null }).lean();
+        const assignedCourses = await Course.find({ teacher: req.session.userId }).lean();
+        return res.render('available-classes', {
+          user: {
+            username: req.session.username,
+            name: req.session.name,
+            role: req.session.role
+          },
+          availableCourses,
+          assignedCourses,
+          errorMsg: 'Unable to remove class. Please try again.'
+        });
+      } catch (innerErr) {
+        console.error('❌ Error reloading classes after remove failure:', innerErr);
+        return res.status(500).send('Server error');
+      }
+    }
+  }
+);
+
+// -----------------------------------------
+// TEACHER: CLASS INFO MENU → GET /teacher/info
+// -----------------------------------------
+router.get(
+  '/teacher/info',
+  isLoggedIn,
+  requireRole('teacher'),
+  async (req, res) => {
+    try {
+      // Fetch all courses assigned to this teacher
+      const assignedCourses = await Course.find({ teacher: req.session.userId }).lean();
+
+      return res.render('teacher-info', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        assignedCourses,
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error loading teacher class info:', err);
+      return res.render('teacher-info', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        assignedCourses: [],
+        errorMsg: 'Unable to load your classes. Please try again.'
+      });
+    }
+  }
+);
+
+// -----------------------------------------
+// TEACHER: SEE STUDENTS IN A COURSE → GET /teacher/info/:courseId/students
+// -----------------------------------------
+router.get(
+  '/teacher/info/:courseId/students',
+  isLoggedIn,
+  requireRole('teacher'),
+  async (req, res) => {
+    const { courseId } = req.params;
+    try {
+      // 1) Verify this teacher is assigned to that course
+      const course = await Course.findOne({
+        _id: courseId,
+        teacher: req.session.userId
+      }).lean();
+
+      if (!course) {
+        return res.status(404).send('Course not found or not assigned to you');
+      }
+
+      // 2) Find all registrations for that course and populate student fields
+      const regs = await Registration
+        .find({ course: courseId })  // <— let Mongoose cast the string
+        .populate('student')
+        .lean();
+
+      // 3) Extract only the student objects (filter out null just in case)
+      const students = regs
+        .map(r => r.student)
+        .filter(s => s);
+
+      return res.render('teacher-course-students', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        course,
+        students,
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error loading students for course:', err);
+      return res.render('teacher-course-students', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        course: null,
+        students: [],
+        errorMsg: 'Unable to load students for this class.'
+      });
+    }
   }
 );
 
@@ -679,6 +916,159 @@ router.get(
         searchId: searchId || '',
         errorMsg: 'Unable to load teachers.'
       });
+    }
+  }
+);
+
+router.get(
+  '/messages',
+  isLoggedIn,
+  async (req, res) => {
+    try {
+      // 1. Fetch all messages where receiver = current user
+      const msgs = await Message
+        .find({ receiver: req.session.userId })
+        .populate('sender', 'name username role') // only need name/username/role
+        .sort({ sentAt: -1 })
+        .lean();
+
+      return res.render('messages', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        messages: msgs,
+        errorMsg: undefined
+      });
+    } catch (err) {
+      console.error('❌ Error loading inbox:', err);
+      return res.render('messages', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        messages: [],
+        errorMsg: 'Unable to load your messages. Please try again.'
+      });
+    }
+  }
+);
+
+
+// ==================================
+// SHOW SEND MESSAGE FORM: GET /messages/send
+// ==================================
+router.get(
+  '/messages/send',
+  isLoggedIn,
+  async (req, res) => {
+    res.render('send-message', {
+      user: {
+        username: req.session.username,
+        name: req.session.name,
+        role: req.session.role
+      },
+      errorMsg: undefined,
+      successMsg: undefined
+    });
+  }
+);
+
+
+// ==================================
+// HANDLE SEND MESSAGE: POST /messages/send
+// ==================================
+router.post(
+  '/messages/send',
+  isLoggedIn,
+  async (req, res) => {
+    const { recipientUsername, content } = req.body;
+
+    // Validate presence
+    if (!recipientUsername || !recipientUsername.trim()) {
+      return res.render('send-message', {
+        user: { username: req.session.username, name: req.session.name, role: req.session.role },
+        errorMsg: 'Please enter a recipient username.',
+        successMsg: undefined
+      });
+    }
+    if (!content || !content.trim()) {
+      return res.render('send-message', {
+        user: { username: req.session.username, name: req.session.name, role: req.session.role },
+        errorMsg: 'Message content cannot be empty.',
+        successMsg: undefined
+      });
+    }
+
+    try {
+      // Lookup by username instead of idNumber
+      const recipient = await User.findOne({ username: recipientUsername.trim() });
+      if (!recipient) {
+        return res.render('send-message', {
+          user: { username: req.session.username, name: req.session.name, role: req.session.role },
+          errorMsg: 'Recipient username not found.',
+          successMsg: undefined
+        });
+      }
+
+      // Save the message
+      await Message.create({
+        sender:   req.session.userId,
+        receiver: recipient._id,
+        content:  content.trim()
+      });
+
+      return res.render('send-message', {
+        user:       { username: req.session.username, name: req.session.name, role: req.session.role },
+        errorMsg:   undefined,
+        successMsg: 'Message sent successfully!'
+      });
+    } catch (err) {
+      console.error('❌ Error sending message:', err);
+      return res.render('send-message', {
+        user:       { username: req.session.username, name: req.session.name, role: req.session.role },
+        errorMsg:   'Server error. Please try again later.',
+        successMsg: undefined
+      });
+    }
+  }
+);
+
+
+// =======================================
+// 2) VIEW SINGLE MESSAGE: GET /messages/:messageId
+// =======================================
+router.get(
+  '/messages/:messageId',
+  isLoggedIn,
+  async (req, res) => {
+    const { messageId } = req.params;
+    try {
+      // 1. Fetch the message by ID and populate sender and receiver
+      const msg = await Message
+        .findById(messageId)
+        .populate('sender', 'name username role')
+        .populate('receiver', 'name username role')
+        .lean();
+
+      // 2. If not found or current user is not the receiver, 404
+      if (!msg || msg.receiver._id.toString() !== req.session.userId) {
+        return res.status(404).send('Message not found');
+      }
+
+      return res.render('message-detail', {
+        user: {
+          username: req.session.username,
+          name: req.session.name,
+          role: req.session.role
+        },
+        message: msg
+      });
+    } catch (err) {
+      console.error('❌ Error loading message detail:', err);
+      return res.status(500).send('Server error');
     }
   }
 );

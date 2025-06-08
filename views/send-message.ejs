@@ -1,0 +1,109 @@
+<!-- views/send-message.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Send Message</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background: #2a3d66;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+    nav a { color: #fff; text-decoration: none; font-weight: bold; }
+    nav a:hover { text-decoration: underline; }
+
+    main {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 { margin-bottom: 1.5rem; color: #2a3d66; text-align: center; }
+    form label { display: block; margin-top: 1rem; font-weight: bold; }
+    form input, form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    form textarea { resize: vertical; height: 150px; }
+    form button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #2a3d66;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    form button:hover { background: #1f2b4f; }
+
+    .error { margin-top: 1rem; color: #c0392b; text-align: center; }
+    .success { margin-top: 1rem; color: #27ae60; text-align: center; }
+
+    .back-link { display: inline-block; margin-top: 2rem; color: #2a3d66; text-decoration: none; font-weight: bold; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <% if (user.role === 'student') { %><li><a href="/student">Dashboard</a></li><% } %>
+        <% if (user.role === 'teacher') { %><li><a href="/teacher">Dashboard</a></li><% } %>
+        <% if (user.role === 'admin')   { %><li><a href="/admin">Dashboard</a></li><% } %>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/messages">Messages</a></li>
+        <li><a href="/logout">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Send a New Message</h2>
+
+    <% if (errorMsg) { %>
+      <div class="error"><%= errorMsg %></div>
+    <% } %>
+    <% if (successMsg) { %>
+      <div class="success"><%= successMsg %></div>
+    <% } %>
+
+    <form action="/messages/send" method="POST">
+      <label for="recipientUsername">Recipient Username</label>
+      <input
+        type="text"
+        id="recipientUsername"
+        name="recipientUsername"
+        placeholder="Enter recipient’s username"
+        required
+      />
+      <label for="content">Message</label>
+      <textarea id="content" name="content" required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+
+    <a href="/messages" class="back-link">← Back to Inbox</a>
+  </main>
+
+</body>
+</html>

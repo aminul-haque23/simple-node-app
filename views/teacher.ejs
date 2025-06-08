@@ -1,28 +1,106 @@
+<!-- views/teacher.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Teacher Page</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <title>Teacher Dashboard</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background-color: #2a3d66;
+      color: #fff;
+      padding: 1rem 2rem;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== Main Container ===== */
+    main {
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #2a3d66;
+    }
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .buttons a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background-color: #2a3d66;
+      color: #fff;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    .buttons a:hover {
+      background-color: #1f2b4f;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 480px) {
+      main {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      .buttons a {
+        padding: 0.75rem;
+      }
+    }
+  </style>
 </head>
 <body>
+
+  <!-- Header / Navigation -->
   <header>
-    <nav>
-      <ul>
-        <!-- Always show home link; if logged in, we know role is "teacher" here -->
-        <li><a href="/">Home</a></li>
-        <li><a href="/profile">Profile</a></li>
-        <li><a href="/logout">Log Out</a></li>
-      </ul>
-    </nav>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/profile">Profile</a></li>
+          <li><a href="/messages">Inbox</a></li>
+          <li><a href="/messages/send">Send Message</a></li>
+          <li><a href="/logout">Log Out</a></li>
+        </ul>
+      </nav>
+
   </header>
 
+  <!-- Teacher Menu -->
   <main>
-    <h1>Teacher Dashboard</h1>
-    <p>Welcome, <strong><%= user.name %></strong> (<%= user.username %>)</p>
-    <p>Your role: <strong><%= user.role %></strong></p>
-    <p>This is the page only teachers can see.</p>
+    <h2>Welcome, <%= user.name %>!</h2>
+    <div class="buttons">
+      <a href="/teacher/classes">Manage Classes</a>
+      <a href="/teacher/info">Class Info</a>
+    </div>
   </main>
+
 </body>
 </html>
